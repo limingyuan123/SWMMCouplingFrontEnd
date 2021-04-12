@@ -1,18 +1,36 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <el-row>
+      <div>
+        <navbar></navbar>
+      </div>
+    </el-row>
+    <el-row style="height:  calc(100vh - 95px);width:100%; display:flex">
+      <div class="leftMenu">
+        <left-menu></left-menu>
+      </div>
+    </el-row>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+//组件懒加载
+const LeftMenu = () => import("@/components/LeftMenu.vue");
+const Navbar = () => import("@/components/Navbar.vue");
 
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
-    HelloWorld
-  }
-}
+    LeftMenu,
+    Navbar,
+  },
+};
 </script>
+<style>
+body {
+  margin: 0;
+}
+.leftMenu{
+  float:left;height:100%;minwidth:180px
+}
+</style>
