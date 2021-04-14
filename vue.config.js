@@ -1,3 +1,4 @@
+const webpack = require("webpack");
 module.exports = {
     lintOnSave:false,//关闭ESLint代码检验
     devServer:{
@@ -18,5 +19,15 @@ module.exports = {
                 }
             },
         }
-    }
+    },
+    configureWebpack: {
+        plugins: [
+          new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+            "window.jQuery": "jquery",
+            Popper: ["popper.js", "default"]
+          })
+        ]
+      }
 }
