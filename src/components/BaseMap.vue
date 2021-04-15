@@ -28,34 +28,17 @@
     <div id="leafletMap" v-loading="loading"></div>
 
     <el-dialog title="Load INP File" :visible.sync="fileDialog" width="30%">
-      <!-- <el-upload
-        class="upload-demo"
-        drag
-        action="https://jsonplaceholder.typicode.com/posts/"
-        multiple
-        :on-change="uploadChange"
-        :file-list="uploadFiles"
-        :on-remove="uploadRemove"
-        :on-success="handleSuccess"
-      >
-        <i class="el-icon-upload"></i>
-        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <el-button id="uploadFile" style="display:none;position:absolute" slot="trigger" size="small" type="primary">选取文件
-        </el-button>
-      </el-upload> -->
-      <el-upload
+        <el-upload
                 class="upload-demo"
-                multiple="true"
-                ref="upload"
+                multiple
                 drag
+                action="https://jsonplaceholder.typicode.com/posts/"
+                ref="upload"
                 :on-change="uploadChange"
                 :auto-upload="false">
                 <i class="el-icon-upload"></i>
-                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <el-button id="uploadFile" style="display:none" slot="trigger" size="small"
-                       type="primary">选取文件
-            </el-button>
-      </el-upload>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        </el-upload>
       <span slot="footer" class="dialog-footer">
         <el-button @click="fileDialog = false">取 消</el-button>
         <el-button type="primary" @click="confirmLoad()">确 定</el-button>
@@ -77,44 +60,13 @@ export default {
       fileDialog: false,
       loading: false,
       uploadFiles: [],
-      
+      geojson:'',
     };
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.initSize);
   },
   methods: {
-    initSize() {
-      $("#leafletMap").css("min-width", "0");
-      $("#leafletMap").css("min-height", "0");
-      $("#leafletMap").css("height", window.innerHeight - 61 + "px");
-    },
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    openFileDialog() {
-      this.fileDialog = true;
-    },
-    confirmLoad() {
-      let _this = this;
-      this.fileDialog = false;
-      this.loading = true;
-      let form = new FormData();
-      for (let i = 0; i < this.uploadFiles.length; i++) {
-        form.append("datafile", this.uploadFiles[i].raw);
-      }
-
-      this.$axios.post("/api/inp", form).then((res) => {
-        console.log(res);
-        _this.loading = false;
-      });
-    },
-    uploadChange(file, fileList) {
-      this.uploadFiles = fileList;
-    },
     initMap() {
       this.tdtVectorMap =
         "http://t0.tianditu.gov.cn/vec_w/wmts?tk=d6b0b78f412853967d91042483385d2c" +
@@ -210,17 +162,43 @@ export default {
       };
       this.map.pm.addControls(options);
     },
-    uploadRemove(file, fileList) {
-                this.uploadFiles = fileList;
-                if(this.uploadFiles.length==0)
-                    this.uploadName = ''
-    },    
-    handleSuccess(result, file, fileList) {
-                console.log(result)
-                let uploadSource = [];
-                uploadSource.push(result.data);
-                // this.upload_data_dataManager(uploadSource);
-            },
+    initSize() {
+      $("#leafletMap").css("min-width", "0");
+      $("#leafletMap").css("min-height", "0");
+      $("#leafletMap").css("height", window.innerHeight - 61 + "px");
+    },
+    handleOpen(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    handleClose(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    openFileDialog() {
+      this.fileDialog = true;
+    },
+    confirmLoad() {
+      let _this = this;
+      this.fileDialog = false;
+      this.loading = true;
+      let form = new FormData();
+      for (let i = 0; i < this.uploadFiles.length; i++) {
+        form.append("datafile", this.uploadFiles[i].raw);
+      }
+
+      this.$axios.post("/api/inp", form).then((res) => {
+        console.log(res);
+        _this.geojson = res.data.message.geojson.GeoJson;
+        let geojsonLayer = L.geoJSON(_this.geojson).addTo(_this.map);
+        geojsonLayer.addData(_this.geojson);
+        _this.loading = false;
+      });
+    },
+    uploadChange(file, fileList) {
+      this.uploadFiles = fileList;
+    },
+    selectFile(){
+        $("#uploadFile").click()
+    },
   },
   mounted() {
     this.initSize();
