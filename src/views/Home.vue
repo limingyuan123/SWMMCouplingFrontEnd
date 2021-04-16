@@ -10,24 +10,30 @@
         <left-menu></left-menu>
       </div>
     </el-row> -->
-    <el-row>
+    <!-- <el-row>
       <base-map></base-map>
+    </el-row> -->
+
+    <el-row>
+      <cesium-map></cesium-map>
     </el-row>
   </div>
 </template>
 
 <script>
 import BaseMap from '../components/BaseMap.vue';
+import CesiumMap from '../components/cesiumMap.vue';
 //组件懒加载
-const LeftMenu = () => import("@/components/LeftMenu.vue");
+// const LeftMenu = () => import("@/components/LeftMenu.vue");
 const Navbar = () => import("@/components/Navbar.vue");
 
 export default {
   name: "Home",
   components: {
-    LeftMenu,
+    // LeftMenu,
     Navbar,
     BaseMap,
+    CesiumMap,
   },
 };
 </script>
@@ -35,7 +41,7 @@ export default {
 body {
   margin: 0;
 }
-.leftMenu{
+/* .leftMenu{
   float:left;height:100%;minwidth:180px
-}
+} */
 </style>
