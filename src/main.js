@@ -12,6 +12,9 @@ import jquery from 'jquery'
 import MiniMap from 'leaflet-minimap'
 import 'leaflet.pm'
 import 'leaflet.pm/dist/leaflet.pm.css'
+import $ from 'jquery';
+window.jQuery = $;
+window.$ = $;
 
 Vue.use(ElementUI)
 

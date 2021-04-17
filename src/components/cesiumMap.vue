@@ -134,7 +134,12 @@ export default {
         entity.polygon.outline = false;
         entity.polygon.extrudedHeight = entity.properties.childrenNum * 5000; //高度扩大5000倍，便于观察
       }
-    }
+    },
+    initSize() {
+      $("#leafletMap").css("min-width", "0");
+      $("#leafletMap").css("min-height", "0");
+      $("#cesiumContainer").css("height", window.innerHeight-61);
+    },
   },
   mounted() {
     /* eslint no-new: */
@@ -144,6 +149,10 @@ export default {
 
     //设置cesium中心展示位置
     this.setView();
+    this.initSize();
+    window.onresize = () => {
+      $("#cesiumContainer").css("height", window.innerHeight-61);
+    };
     // this.addGeoJson();
 
   },
@@ -158,7 +167,7 @@ export default {
 }
 .tool {
   position: absolute;
-  top: 25%;
+  top: 40%;
   z-index: 10000;
   left: 0%;
 }

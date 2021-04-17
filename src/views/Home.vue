@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <el-row>
-      <div>
+      <div class="header">
         <navbar></navbar>
       </div>
     </el-row>
@@ -15,7 +15,9 @@
     </el-row> -->
 
     <el-row>
+       <div class="mapContainer">
       <cesium-map></cesium-map>
+       </div>
     </el-row>
   </div>
 </template>
@@ -40,6 +42,16 @@ export default {
 <style>
 body {
   margin: 0;
+}
+.header{
+  position: absolute;
+  top: 0px;
+  z-index: 1000;
+  width: 100%;
+}
+.mapContainer{
+  position: relative;
+  top:61px;
 }
 /* .leftMenu{
   float:left;height:100%;minwidth:180px

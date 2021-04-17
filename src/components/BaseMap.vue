@@ -187,7 +187,7 @@ export default {
 
       this.$axios.post("/api/inp", form).then((res) => {
         console.log(res);
-        _this.geojson = res.data.message.geojson.GeoJson;
+        _this.geojson = res.data.message.geojson;
         let geojsonLayer = L.geoJSON(_this.geojson).addTo(_this.map);
         geojsonLayer.addData(_this.geojson);
         _this.loading = false;
