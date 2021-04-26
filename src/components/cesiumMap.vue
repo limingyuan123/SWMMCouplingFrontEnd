@@ -16,9 +16,13 @@
           <i class="el-icon-menu"></i>
           <span slot="title">导航二</span>
         </el-menu-item>
+        <el-menu-item index="3" @click="clearInp()">
+          <i class="el-icon-refresh"></i>
+          <span slot="title">Clear</span>
+        </el-menu-item>
       </el-menu>
     </div>
-    <div id="cesiumContainer"></div>
+    <div id="cesiumContainer" v-loading="loading"></div>
     <el-dialog title="Load INP File" :visible.sync="fileDialog" width="30%">
       <el-upload
         class="upload-demo"
@@ -45,8 +49,6 @@
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { Viewer } from "cesium";
 import * as Cesium from "cesium/Source/Cesium.js";
-import loadFile from '../assets/js/loadFile';
-import jsonData from '@/assets/nanjing.json';
 // import Cesium from 'cesium/Source/Cesium.js'
 export default {
   name: "CesiumContainer",
@@ -57,6 +59,7 @@ export default {
       loading: false,
       uploadFiles: [],
       geojson: "",
+      geojsonLayer:Object,
       viewer:Object,
       fileList:[],
     };
@@ -84,13 +87,23 @@ export default {
       }
 
       this.$axios.post("/api/inp", form).then((res) => {
-        console.log(res);
-        _this.geojson = res.data.message.geojson;
-        _this.addGeoJson(_this.geojson);
-
-        // let geojsonLayer = L.geoJSON(_this.geojson).addTo(_this.map);
-        // geojsonLayer.addData(_this.geojson);
         _this.loading = false;
+        if(res.data.code === 0){          
+          console.log(res);
+          _this.$message({
+            message:'Load INP Success!',
+            type:"success"
+          })
+          _this.geojson = res.data.data;
+          _this.addGeoJson(_this.geojson);          
+        }else{
+          _this.$message({
+            message:'Load INP Failed!',
+            type:'error'
+          })
+        }
+        
+        
       });
     },
     selectFile() {
@@ -111,14 +124,14 @@ export default {
         });
     },
     addGeoJson(json){
-        let res = Cesium.GeoJsonDataSource.load(json, {
+        this.geojsonLayer = Cesium.GeoJsonDataSource.load(json, {
         stroke: Cesium.Color.WHITE,
         fill: Cesium.Color.BLUE.withAlpha(0.3), //注意：颜色必须大写，即不能为blue
         strokeWidth: 5
       })
-        this.viewer.dataSources.add(res);
+        this.viewer.dataSources.add(this.geojsonLayer);
 
-      let entities = res.entities.values;
+      let entities = this.geojsonLayer.entities.values;
       let colorHash = {};
       for (let i = 0; i < entities.length; i++) {
         let entity = entities[i];
@@ -140,6 +153,12 @@ export default {
       $("#leafletMap").css("min-height", "0");
       $("#cesiumContainer").css("height", window.innerHeight-61);
     },
+    clearInp(){
+      console.log('clearInp')
+      console.log(this.viewer.dataSources);
+      let flag = this.viewer.dataSources.dataSources = [];
+      console.log(flag);
+    }
   },
   mounted() {
     /* eslint no-new: */
