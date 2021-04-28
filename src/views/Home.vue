@@ -13,18 +13,25 @@
     <!-- <el-row>
       <base-map></base-map>
     </el-row> -->
-
-    <el-row>
-       <div class="mapContainer">
-      <cesium-map></cesium-map>
-       </div>
-    </el-row>
+    <div class="container">
+      <el-row style="height:  calc(100vh - 61px);width:50%; display:flex;position:absolute;top: 61px;">
+        <div class="leftContainer">
+          <left-tools></left-tools>
+        </div>
+      </el-row>
+      <el-row>
+        <div class="mapContainer">
+        <cesium-map></cesium-map>
+        </div>
+      </el-row>
+    </div>    
   </div>
 </template>
 
 <script>
 import BaseMap from '../components/BaseMap.vue';
 import CesiumMap from '../components/cesiumMap.vue';
+import LeftTools from '../components/LeftTools.vue';
 //组件懒加载
 // const LeftMenu = () => import("@/components/LeftMenu.vue");
 const Navbar = () => import("@/components/Navbar.vue");
@@ -36,6 +43,7 @@ export default {
     Navbar,
     BaseMap,
     CesiumMap,
+    LeftTools,
   },
 };
 </script>
@@ -52,6 +60,16 @@ body {
 .mapContainer{
   position: relative;
   top:61px;
+}
+.leftContainer{
+  float: left;
+  height: 100%;
+  width:50%;
+  z-index: 1000;
+}
+.container{
+  position: relative;
+  /* top:61px; */
 }
 /* .leftMenu{
   float:left;height:100%;minwidth:180px

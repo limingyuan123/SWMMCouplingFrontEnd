@@ -95,10 +95,10 @@ export default {
             type:"success"
           })
           _this.geojson = res.data.data;
-          _this.addGeoJson(_this.geojson);          
+          _this.addGeoJson(_this.geojson);
         }else{
           _this.$message({
-            message:'Load INP Failed!',
+            message: res.data.message,
             type:'error'
           })
         }
@@ -122,6 +122,8 @@ export default {
             roll: 0,
         },
         });
+        this.viewer.animation.container.style.visibility = 'hidden' // 不显示动画控件
+        this.viewer.timeline.container.style.visibility = 'hidden' // 不显示时间线控件
     },
     addGeoJson(json){
         this.geojsonLayer = Cesium.GeoJsonDataSource.load(json, {
@@ -129,24 +131,31 @@ export default {
         fill: Cesium.Color.BLUE.withAlpha(0.3), //注意：颜色必须大写，即不能为blue
         strokeWidth: 5
       })
-        this.viewer.dataSources.add(this.geojsonLayer);
-
-      let entities = this.geojsonLayer.entities.values;
-      let colorHash = {};
-      for (let i = 0; i < entities.length; i++) {
-        let entity = entities[i];
-        let name = entity.name;
-        let color = colorHash[name];
-        if (!color) {
-          color = Cesium.Color.fromRandom({
-            alpha: 1.0
-          });
-          colorHash[name] = color;
+      this.geojsonLayer.then((dataSources)=>{
+        this.viewer.dataSources.add(dataSources);
+        let entities = dataSources.entities.values;
+        let colorHash = {};
+        for (let i = 0; i < entities.length; i++) {
+          let entity = entities[i];
+          let name = entity.name;
+          let color = colorHash[name];
+          if (!color) {
+            color = Cesium.Color.fromRandom({
+              alpha: 1.0
+            });
+            colorHash[name] = color;
+          }
+          //根据不同的形状特征来着色，包括point polygon 等
+          // if(entity.polygon != undefined){
+          //   entity.polygon.material = color;
+          //   // entity.polygon.outline = false;
+          //   entity.polygon.extrudedHeight = entity.properties.childrenNum * 5000; //高度扩大5000倍，便于观察
+          // }
+          
         }
-        entity.polygon.material = color;
-        entity.polygon.outline = false;
-        entity.polygon.extrudedHeight = entity.properties.childrenNum * 5000; //高度扩大5000倍，便于观察
-      }
+      })
+      
+
     },
     initSize() {
       $("#leafletMap").css("min-width", "0");
