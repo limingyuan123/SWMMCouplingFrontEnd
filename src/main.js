@@ -13,12 +13,14 @@ import MiniMap from 'leaflet-minimap'
 import 'leaflet.pm'
 import 'leaflet.pm/dist/leaflet.pm.css'
 import $ from 'jquery';
+const echarts = require('echarts')
 window.jQuery = $;
 window.$ = $;
 
 Vue.use(ElementUI)
 
 Vue.prototype.$axios = axios;
+Vue.prototype.$echarts = echarts;
 
 Vue.config.productionTip = false
 
@@ -26,6 +28,7 @@ new Vue({
   router,
   store,
   axios,
+  echarts,
   jquery,
   render: h => h(App)
 }).$mount('#app')
