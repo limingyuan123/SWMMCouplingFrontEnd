@@ -1,7 +1,41 @@
 <template>
   <div>
     <div class="tool">
-      <el-menu
+      <!-- <div class = "leftMenu" style="height:100%;width:30%;float:left"> -->
+        
+        <el-tabs v-model="activeName" @tab-click="handleClick"  type="card" style="height:100%" stretch="true">
+            <el-tab-pane label="File" name="first">
+                <!-- File -->
+                <div class="detail">
+                    <p>You can perform a series of file operations, including loading project files, importing configuration files, and saving result files
+
+</p>
+                </div>
+                <el-button class="file" style="background:#d4d7d8;margin:5px">
+                    <h2 style="margin:5px;">Select Model</h2>
+                    <p>You can choose your model here</p>
+                </el-button>
+                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="openFileDialog()">
+                    <h2 style="margin:5px;">Load Project File</h2>
+                    <p>load your project file, example inp file</p>
+                </el-button>
+                <el-button class="file" style="background:#d4d7d8;margin:5px">
+                    <h2 style="margin:5px;">Import Configure File</h2>
+                    <p>importing configuration files</p>
+                </el-button>
+                <el-button class="file" style="background:#d4d7d8;margin:5px">
+                    <h2 style="margin:5px;">Save Result File</h2>
+                    <p>saving result files</p>
+                </el-button>
+                  <el-button type="success" style="float:right;margin:5px"  @click="invoke()">Invoke</el-button>
+
+            </el-tab-pane>
+            <el-tab-pane label="Operation" name="second">Operation</el-tab-pane>
+            <el-tab-pane label="Simulation" name="third">Simulation</el-tab-pane>
+            <el-tab-pane label="Coupling analysis" name="fourth">Coupling analysis</el-tab-pane>
+        </el-tabs>
+      <!-- </div> -->
+      <!-- <el-menu
         default-active="1"
         class="el-menu-vertical-demo"
         @open="handleOpen"
@@ -15,14 +49,20 @@
         <el-menu-item index="2">
           <i class="el-icon-menu"></i>
           <span slot="title">导航二</span>
-        </el-menu-item>
-        <el-menu-item index="3" @click="clearInp()">
+        </el-menu-item> -->
+        <!-- <el-menu-item index="3" @click="clearInp()">
           <i class="el-icon-refresh"></i>
-          <span slot="title">Clear</span>
+          <span slot="tzitle">Clear</span>
         </el-menu-item>
-      </el-menu>
+        <el-menu-item index = "4" @click="invoke()">
+          <i class="el-icon-thumb"></i>
+          <span slot="title">Invoke</span>
+        </el-menu-item> -->
     </div>
+
     <div id="cesiumContainer" v-loading="loading"></div>
+
+
     <el-dialog title="Load INP File" :visible.sync="fileDialog" width="30%">
       <el-upload
         class="upload-demo"
@@ -40,6 +80,22 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="fileDialog = false">取 消</el-button>
         <el-button type="primary" @click="confirmLoad()">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
+      title="SWMM Visual"
+      :visible.sync="swmmVisualDialog"
+      width="90%"
+      :before-close="handleClose">
+      <span>
+        <iframe src="http://221.226.60.2:8082/data/a3f07e87-1569-49b6-9175-0c76bd2bca9a?type=html" scrolling="no" style="width: 100%;height: 500px;" frameborder="0"></iframe>
+      </span>
+      
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="swmmVisualDialog = false">Cancel</el-button>
+        <el-button type="primary" @click="swmmVisualDialog = false">Confirm</el-button>
       </span>
     </el-dialog>
   </div>
@@ -62,6 +118,8 @@ export default {
       geojsonLayer:Object,
       viewer:Object,
       fileList:[],
+      swmmVisualDialog:false,
+      activeName: 'first'   
     };
   },
   methods: {
@@ -74,7 +132,7 @@ export default {
     openFileDialog() {
       this.uploadFiles = [];
     //   this.$refs['upload'].clearFiles();
-    this.fileList = [];
+      this.fileList = [];
       this.fileDialog = true;
     },
     confirmLoad() {
@@ -167,6 +225,18 @@ export default {
       console.log(this.viewer.dataSources);
       let flag = this.viewer.dataSources.dataSources = [];
       console.log(flag);
+    },
+    invoke(){
+      let _this = this;
+      _this.loading = true;
+      setTimeout(()=>{
+        this.invokeSuc()
+      }, 3000)
+      // setTimeout(_this.invokeSuc(), 5000);
+    },
+    invokeSuc(){
+      this.loading = false;
+      this.swmmVisualDialog = true;
     }
   },
   mounted() {
@@ -194,10 +264,19 @@ export default {
   width: 100%;
   height: 100%;
 }
-.tool {
+/* .tool {
   position: absolute;
   top: 40%;
   z-index: 10000;
+  left: 0%;
+} */
+.tool {
+  background: white;
+  height: 100%;
+  width:30%;
+  position: absolute;
+  /* top: 40%; */
+  z-index: 1000;
   left: 0%;
 }
 </style>
