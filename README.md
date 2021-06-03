@@ -1,5 +1,4 @@
-# swmm_coupling_front2
-
+# UrbanStormWaterCouplingFrontEnd
 ## Project setup
 ```
 npm install
