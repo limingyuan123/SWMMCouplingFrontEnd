@@ -8,6 +8,10 @@
 
 </p>
                 </div>
+                <el-button class="mode" style="background:#d4d7d8;margin:5px">
+                    <h2 style="margin:5px;">Select Model</h2>
+                    <p>You can choose your model here</p>
+                </el-button>
                 <el-button class="file" style="background:#d4d7d8;margin:5px">
                     <h2 style="margin:5px;">Load Project File</h2>
                     <p>load your project file, example inp file</p>
@@ -20,6 +24,7 @@
                     <h2 style="margin:5px;">Save Result File</h2>
                     <p>saving result files</p>
                 </el-button>
+                  <el-button type="success" style="float:right;margin:5px">Invoke</el-button>
 
             </el-tab-pane>
             <el-tab-pane label="Operation" name="second">Operation</el-tab-pane>

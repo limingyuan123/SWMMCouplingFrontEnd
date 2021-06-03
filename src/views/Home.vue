@@ -15,9 +15,9 @@
     </el-row> -->
     <div class="container">
       <el-row style="height:  calc(100vh - 61px);width:50%; display:flex;position:absolute;top: 61px;">
-        <div class="leftContainer">
+        <!-- <div class="leftContainer">
           <left-tools></left-tools>
-        </div>
+        </div> -->
       </el-row>
       <el-row>
         <div class="mapContainer">

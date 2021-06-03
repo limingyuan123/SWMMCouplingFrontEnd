@@ -25,6 +25,11 @@ const routes = [
     name:'Flow',
     component:()=>import('../views/Flow.vue')
   },
+  {
+    path:'/lisflood',
+    name:'Lisflood',
+    component:()=>import('../views/lisflood.vue')
+  },
 ]
 
 const router = new VueRouter({
