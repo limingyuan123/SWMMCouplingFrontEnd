@@ -4,7 +4,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const cesiumSource = 'node_modules/cesium/Build/Cesium'
 module.exports = {
   publicPath: './',
-  assetsDir: './static',
+  assetsDir: './public',
   productionSourceMap: false,
   lintOnSave: false, //关闭ESLint代码检验
   devServer: {

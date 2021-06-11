@@ -30,6 +30,11 @@ const routes = [
     name:'Lisflood',
     component:()=>import('../views/lisflood.vue')
   },
+  {
+    path:'/swmmviewer',
+    name:'SWMMViewer',
+    component:()=>import('../views/SWMMViewer.vue')
+  },
 ]
 
 const router = new VueRouter({

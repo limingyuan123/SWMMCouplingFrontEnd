@@ -95,40 +95,10 @@ export default {
     mounted(){
         this.init();
         this.flowData = regGrid[0];
-        // this.drawArrowsNew(this.flowData);
+        this.drawArrowsNew(this.flowData);
     },
     created(){    
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        var renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        camera.position.y = 1;
-        camera.position.z = 5;
-
-        //构建场景代码放在这里
-        var dir = new THREE.Vector3(1, 2, 0);
-
-        //normalize the direction vector (convert to vector of length 1)
-        dir.normalize();
-
-        var origin = new THREE.Vector3(0, 0, 0);
-        var length = 1;
-        var hex = 0xffff00;
-
-        var arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex);
-        scene.add(arrowHelper);
-
-        var render = function() {
-            requestAnimationFrame(render);
-            //更新场景代码放在这里
-            renderer.render(scene, camera);
-        };
-
-        render();
-        
+                
     }
 }
 </script>
