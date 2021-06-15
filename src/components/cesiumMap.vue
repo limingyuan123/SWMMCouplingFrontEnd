@@ -3,8 +3,8 @@
     <div class="tool">
       <!-- <div class = "leftMenu" style="height:100%;width:30%;float:left"> -->
         
-        <el-tabs v-model="activeName" @tab-click="handleClick"  type="card" style="height:100%" stretch=true>
-            <el-tab-pane label="现状" name="first">
+        <el-tabs v-model="activeName" @tab-click="handleClick"  type="card" style="height:100%" stretch>
+            <el-tab-pane label="水深图" name="first">
                 <!-- File -->
                 <div class="detail">
                     <!-- <p>You can perform a series of file operations, including loading project files, importing configuration files, and saving result files</p> -->
@@ -18,7 +18,7 @@
                     <h2 style="margin:5px;">十年一遇降水</h2>
                     <p>选择该降水数据，展示模拟结果</p>
                 </el-button>
-                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadDispRes(twentyNow)">
+                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadFenhuLayer(0,20)">
                     <h2 style="margin:5px;">二十年一遇降水</h2>
                     <p>选择该降水数据，展示模拟结果</p>
                 </el-button>
@@ -30,43 +30,31 @@
                     <h2 style="margin:5px;">五十年一遇降水</h2>
                     <p>选择该降水数据，展示模拟结果</p>
                 </el-button>
-                <!-- <div class="img" style="width:40px;height:40px">
-                  <img src="/img/cesiumIcon/node.png">
-                </div> -->
-                  <!-- <el-button type="success" style="float:right;margin:5px"  @click="invoke()">Invoke</el-button> -->
-
             </el-tab-pane>
-            <el-tab-pane label="改造后" name="second">Operation</el-tab-pane>
+            <el-tab-pane label="流向图" name="second">Operation</el-tab-pane>
             <!-- <el-tab-pane label="Simulation" name="third">Simulation</el-tab-pane>
             <el-tab-pane label="Coupling analysis" name="fourth">Coupling analysis</el-tab-pane> -->
         </el-tabs>
-      <!-- </div> -->
-      <!-- <el-menu
-        default-active="1"
-        class="el-menu-vertical-demo"
-        @open="handleOpen"
-        @close="handleClose"
-        :collapse="isCollapse"
-      >
-        <el-menu-item index="1" @click="openFileDialog()">
-          <i class="el-icon-folder"></i>
-          <span slot="title">File Open</span>
-        </el-menu-item>
-        <el-menu-item index="2">
-          <i class="el-icon-menu"></i>
-          <span slot="title">导航二</span>
-        </el-menu-item> -->
-        <!-- <el-menu-item index="3" @click="clearInp()">
-          <i class="el-icon-refresh"></i>
-          <span slot="tzitle">Clear</span>
-        </el-menu-item>
-        <el-menu-item index = "4" @click="invoke()">
-          <i class="el-icon-thumb"></i>
-          <span slot="title">Invoke</span>
-        </el-menu-item> -->
     </div>
 
     <div id="cesiumContainer" v-loading="loading"></div>
+
+    <div id="time-slider">
+        <el-slider
+        v-model="timeSlider"
+        @change="sliderChange"
+        :step="1"
+        :min="1"
+        :max="maxSlider"
+        :marks="marks"
+        :format-tooltip="formatTooltip"
+        style="width: 80%;margin: auto;">
+        </el-slider>
+        <el-button size="small" round @click="startAnimation" 
+        :disabled="startBtn" style="margin-bottom:5px;">Start</el-button>
+        <el-button size="small" round @click="pauseAnimation" 
+        :disabled="pauseBtn">Pause</el-button>
+    </div>
     
     <!-- 文件上传dialog -->
     <el-dialog title="Load INP File" :visible.sync="fileDialog" width="30%">
@@ -156,6 +144,23 @@ export default {
       dispArr:[],
       dispJSON:{},
       date:[],
+      timeSlider:0,
+      maxSlider:10,      
+      marks: {},
+      startBtn:true,
+      pauseBtn:true,
+      layers:[
+      'fenhu:fenhu0000_ProjectRaster1','fenhu:fenhu0001_ProjectRaster21','fenhu:fenhu0002_ProjectRaster1','fenhu:fenhu0003_ProjectRaster21',
+      'fenhu:fenhu0004_ProjectRaster1','fenhu:fenhu0005_ProjectRaster1','fenhu:fenhu0006_ProjectRaster1','fenhu:fenhu0007_ProjectRaster1',
+      'fenhu:fenhu0008_ProjectRaster1','fenhu:fenhu0009_ProjectRaster1','fenhu:fenhu0010_ProjectRaster1','fenhu:fenhu0011_ProjectRaster11',
+      'fenhu:fenhu0012_ProjectRaster1','fenhu:fenhu0013_ProjectRaster1','fenhu:fenhu0014_ProjectRaster1','fenhu:fenhu0015_ProjectRaster1',
+      'fenhu:fenhu0016_ProjectRaster1','fenhu:fenhu0017_ProjectRaster1','fenhu:fenhu0018_ProjectRaster1','fenhu:fenhu0019_ProjectRaster1',
+      'fenhu:fenhu0020_ProjectRaster1','fenhu:fenhu0021_ProjectRaster1','fenhu:fenhu0022_ProjectRaster1','fenhu:fenhu0023_ProjectRaster1',
+      'fenhu:fenhu0024_ProjectRaster1',],
+      wdlayers:[],
+      date: ["MAY-01-2020  09:00:00", "MAY-01-2020  09:05:00", "MAY-01-2020  09:10:00", "MAY-01-2020  09:15:00", "MAY-01-2020  09:20:00", "MAY-01-2020  09:25:00", "MAY-01-2020  09:30:00", "MAY-01-2020  09:35:00", "MAY-01-2020  09:40:00", "MAY-01-2020  09:45:00", "MAY-01-2020  09:50:00", "MAY-01-2020  09:55:00", "MAY-01-2020  10:00:00", "MAY-01-2020  10:05:00", "MAY-01-2020  10:10:00", "MAY-01-2020  10:15:00", "MAY-01-2020  10:20:00", "MAY-01-2020  10:25:00", "MAY-01-2020  10:30:00", "MAY-01-2020  10:35:00", "MAY-01-2020  10:40:00", "MAY-01-2020  10:45:00", "MAY-01-2020  10:50:00", "MAY-01-2020  10:55:00", "MAY-01-2020  11:00:00"],
+      intevalAnima:null,
+      curDateIndex:0,
     }
   },
   methods: {
@@ -170,6 +175,9 @@ export default {
     //   this.$refs['upload'].clearFiles();
       this.fileList = [];
       this.fileDialog = true;
+    },
+    handleClick(){
+
     },
     confirmLoad() {
       let _this = this;
@@ -208,7 +216,7 @@ export default {
     },
     setView(){
         this.viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(120.731026, 31.261, 15000.0), // 设置位置
+        destination: Cesium.Cartesian3.fromDegrees(120.84401, 31.03674, 15000.0), // 设置位置
 
         orientation: {
             heading: Cesium.Math.toRadians(20.0), // 方向
@@ -317,7 +325,7 @@ export default {
     initSize() {
       $("#leafletMap").css("min-width", "0");
       $("#leafletMap").css("min-height", "0");
-      $("#cesiumContainer").css("height", window.innerHeight-61);
+      $("#cesiumContainer").css("height", window.innerHeight-61-75);
     },
     clearInp(){
       console.log('clearInp')
@@ -369,19 +377,86 @@ export default {
           console.log(_this.dispArr);
         })
     },
-    loadFenhuLayer(){
-      let _baselayer = new Cesium.WebMapServiceImageryProvider({
-          url: 'http://172.21.213.174:8080/geoserver/fenhuTiff4/wms',
-          layers: "fenhuTiff4:fenhu-000611",
+    //加载第几幅图层
+    loadFenhuLayer(flag){
+      this.startBtn = false;
+      this.maxSlider = this.date.length;
+      this.marks={
+        1:this.date[0]
+      }
+      //替换该显示图层透明度
+      for(let i=0;i<this.wdlayers.length;i++){
+        this.wdlayers[i].alpha = 0;
+      }
+      this.wdlayers[flag].alpha = 1;
+      // if(this.wdlayers.length !== 0){
+      //   this.viewer.imageryLayers.remove(this.wdlayers[0]);
+      // }
+      // this.wdlayers = [];
+      // let layer = this.layers[flag];
+      // let _baselayer = new Cesium.WebMapServiceImageryProvider({
+      //   url: 'http://localhost:8080/geoserver/fenhu/wms',
+      //   layers: layer,
+      //   parameters: {
+      //     service: 'WMS',
+      //     format: 'image/png',
+      //     transparent: true,
+      //   }
+      // }); 
+      // let border = this.viewer.imageryLayers.addImageryProvider(_baselayer);
+      // // border.alpha = 0.5;
+      // this.wdlayers.push(border);
+      // this.viewer.flyTo(this.viewer.imageryLayers);
+    },
+    //时间线变动函数
+    sliderChange(val){
+      this.loadFenhuLayer(val);
+      this.curDateIndex = val;
+    },
+    formatTooltip(val){
+      if (this.date != undefined) {
+        return this.date[val-1]
+      }
+    },
+    startAnimation(){
+      this.startBtn = true
+      this.pauseBtn = false
+
+      this.intevalAnima = setInterval(()=>{
+        if (this.curDateIndex == this.date.length) {
+          this.curDateIndex = 0
+          this.timeSlider = 0
+        }
+        this.curDateIndex++
+        this.timeSlider++
+        this.loadFenhuLayer(this.curDateIndex);
+      },1000)
+    },
+    pauseAnimation(){
+      //btn
+      // this.selectBtn = false
+      this.startBtn = false
+      this.pauseBtn = true
+
+      clearInterval(this.intevalAnima)
+    },
+    addLayer(){
+      for(let i=0;i<this.layers.length;i++){
+        let layer = this.layers[i];
+        let _baselayer = new Cesium.WebMapServiceImageryProvider({
+          url: 'http://localhost:8080/geoserver/fenhu/wms',
+          layers: layer,
           parameters: {
-            // service: 'WMS',
+            service: 'WMS',
             format: 'image/png',
             transparent: true,
           }
         }); 
-        this.viewer.imageryLayers.addImageryProvider(_baselayer);
-    }
-    
+        let border = this.viewer.imageryLayers.addImageryProvider(_baselayer);
+        border.alpha = 0;
+        this.wdlayers.push(border);
+      }
+    }    
   },
   mounted() {
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiODcwODhiOC00Y2M3LTQ3ZGYtODUxZC1kOGYzNzcyOWJjZDYiLCJpZCI6NTc4NTAsImlhdCI6MTYyMjY0MzE1MX0.W4miH8AfW1lWpjc75C6NX8mGCk--tV50M-3pWOquha4"
@@ -398,7 +473,9 @@ export default {
     };
     this.parseDispData();
     // this.addGeoJson();
-    this.loadFenhuLayer();
+    // this.loadFenhuLayer(0);
+    //将所有layer都获取到，并置透明度为0
+    this.addLayer();
 
   },
 };
@@ -424,5 +501,10 @@ export default {
   /* top: 40%; */
   z-index: 1000;
   left: 0%;
+}
+#time-slider{
+  text-align: center;
+  z-index: 10000;
+  position: relative;
 }
 </style>

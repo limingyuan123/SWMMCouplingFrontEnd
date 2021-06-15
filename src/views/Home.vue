@@ -21,7 +21,7 @@
       </el-row>
       <el-row>
         <div class="mapContainer">
-        <cesium-map></cesium-map>
+         <cesium-map></cesium-map>
         </div>
       </el-row>
     </div>    
