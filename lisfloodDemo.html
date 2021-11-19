@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Lisflood Viewer</title>    
+    <link
+      href="https://cesiumjs.org/releases/1.51/Build/Cesium/Widgets/widgets.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+      type="text/css"
+    />
+    <style>
+      html,
+      body,
+      #cesiumContainer {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .tool {
+        background: white;
+        height: 100%;
+        width: 30%;
+        position: absolute;
+        /* top: 40%; */
+        z-index: 1000;
+        left: 0%;
+      }
+      #time-slider {
+        text-align: center;
+        z-index: 10000;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <el-menu
+        :default-active="activeIndex"
+        class="el-menu-demo"
+        mode="horizontal"
+        @select="handleSelect"
+        background-color="#545c64"
+        text-color="#fff"
+        active-text-color="#ffd04b"
+      >
+        <el-menu-item index="1">模型处理中心</el-menu-item>
+        <!-- <el-submenu index="2">
+          <template slot="title">我的工作台</template>
+          <el-menu-item index="2-1">选项1</el-menu-item>
+          <el-menu-item index="2-2">选项2</el-menu-item>
+          <el-menu-item index="2-3">选项3</el-menu-item>
+        </el-submenu> -->
+      </el-menu>
+
+      <div class="tool">
+        <!-- <el-tabs
+          v-model="activeName"
+          @tab-click="handleClick"
+          type="card"
+          style="height:100%"
+          stretch
+        > -->
+          <!-- <el-tab-pane label="水深图" name="first"> -->
+            <div class="detail" style="margin-top: 8%;">
+                <p style="text-align: center;">选择不同的降水类型，展示不同的模拟结果</p>
+            </div>
+            <el-button
+              class="file"
+              style="background:#d4d7d8;margin:5px;width:98%"
+              @click="loadFenhuLayer(0, '5year', 0)"
+            >
+              <h2 style="margin:5px;">五年一遇降水</h2>
+              <p>选择该降水数据，展示模拟结果</p>
+            </el-button>
+            <el-button
+              class="file"
+              style="background:#d4d7d8;margin:5px;width:98%"
+              @click="loadFenhuLayer(0, '10year', 0)"
+            >
+              <h2 style="margin:5px;">十年一遇降水</h2>
+              <p>选择该降水数据，展示模拟结果</p>
+            </el-button>
+            <el-button
+              class="file"
+              style="background:#d4d7d8;margin:5px;width:98%"
+              @click="loadFenhuLayer(0, '20year', 0)"
+            >
+              <h2 style="margin:5px;">二十年一遇降水</h2>
+              <p>选择该降水数据，展示模拟结果</p>
+            </el-button>
+            <el-button
+              class="file"
+              style="background:#d4d7d8;margin:5px;width:98%"
+              @click="loadFenhuLayer(0, '30year', 0)"
+            >
+              <h2 style="margin:5px;">三十年一遇降水</h2>
+              <p>选择该降水数据，展示模拟结果</p>
+            </el-button>
+            <el-button
+              class="file"
+              style="background:#d4d7d8;margin:5px;width:98%"
+              @click="loadFenhuLayer(0, '50year', 0)"
+            >
+              <h2 style="margin:5px;">五十年一遇降水</h2>
+              <p>选择该降水数据，展示模拟结果</p>
+            </el-button>
+          <!-- </el-tab-pane>
+          <el-tab-pane label="流向图" name="second">Operation</el-tab-pane>
+        </el-tabs> -->
+      </div>
+      <div id="cesiumContainer"></div>
+      <div id="time-slider">
+        <el-slider
+          v-model="timeSlider"
+          @change="sliderChange"
+          :step="1"
+          :min="1"
+          :max="maxSlider"
+          :marks="marks"
+          :format-tooltip="formatTooltip"
+          style="width: 80%;margin: auto;"
+        >
+        </el-slider>
+        <el-button
+          size="small"
+          round
+          @click="startAnimation"
+          :disabled="startBtn"
+          style="margin-bottom:5px;"
+          >Start</el-button
+        >
+        <el-button
+          size="small"
+          round
+          @click="pauseAnimation"
+          :disabled="pauseBtn"
+          >Pause</el-button
+        >
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.2/dist/echarts.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cesiumjs.org/releases/1.51/Build/Cesium/Cesium.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            activeIndex: "1",
+            activeName: "first",
+            date: [],
+            timeSlider: 0,
+            maxSlider: 10,
+            marks: {},
+            startBtn: true,
+            pauseBtn: true,
+            layers: {
+              "5year": ["fenhu:fenhu:geotiff_coverage0","fenhu:geotiff_coverage1","fenhu:geotiff_coverage2","fenhu:geotiff_coverage3","fenhu:geotiff_coverage4","fenhu:geotiff_coverage5","fenhu:geotiff_coverage6","fenhu:geotiff_coverage7","fenhu:geotiff_coverage8","fenhu:geotiff_coverage9","fenhu:geotiff_coverage10","fenhu:geotiff_coverage11","fenhu:geotiff_coverage12","fenhu:geotiff_coverage13","fenhu:geotiff_coverage14","fenhu:geotiff_coverage15","fenhu:geotiff_coverage16","fenhu:geotiff_coverage17","fenhu:geotiff_coverage18","fenhu:geotiff_coverage19","fenhu:geotiff_coverage20","fenhu:geotiff_coverage21","fenhu:geotiff_coverage22","fenhu:geotiff_coverage23","fenhu:geotiff_coverage24"],
+              "10year":["fenhu:fenhu:geotiff_coverage0","fenhu:geotiff_coverage1","fenhu:geotiff_coverage2","fenhu:geotiff_coverage3","fenhu:geotiff_coverage4","fenhu:geotiff_coverage5","fenhu:geotiff_coverage6","fenhu:geotiff_coverage7","fenhu:geotiff_coverage8","fenhu:geotiff_coverage9","fenhu:geotiff_coverage10","fenhu:geotiff_coverage11","fenhu:geotiff_coverage12","fenhu:geotiff_coverage13","fenhu:geotiff_coverage14","fenhu:geotiff_coverage15","fenhu:geotiff_coverage16","fenhu:geotiff_coverage17","fenhu:geotiff_coverage18","fenhu:geotiff_coverage19","fenhu:geotiff_coverage20","fenhu:geotiff_coverage21","fenhu:geotiff_coverage22","fenhu:geotiff_coverage23","fenhu:geotiff_coverage24"],
+              "20year":["fenhu:fenhu:geotiff_coverage","fenhu:1geotiff_coverage","fenhu:2geotiff_coverage","fenhu:3geotiff_coverage","fenhu:4geotiff_coverage","fenhu:5geotiff_coverage","fenhu:6geotiff_coverage","fenhu:7geotiff_coverage","fenhu:8geotiff_coverage","fenhu:9geotiff_coverage","fenhu:10geotiff_coverage","fenhu:11geotiff_coverage","fenhu:12geotiff_coverage","fenhu:13geotiff_coverage","fenhu:14geotiff_coverage","fenhu:15geotiff_coverage","fenhu:16geotiff_coverage","fenhu:17geotiff_coverage","fenhu:18geotiff_coverage","fenhu:19geotiff_coverage","fenhu:20geotiff_coverage","fenhu:21geotiff_coverage","fenhu:22geotiff_coverage","fenhu:23geotiff_coverage","fenhu:24geotiff_coverage"],
+              "30year":["fenhu:fenhu:geotiff_coverage0","fenhu:geotiff_coverage1","fenhu:geotiff_coverage2","fenhu:geotiff_coverage3","fenhu:geotiff_coverage4","fenhu:geotiff_coverage5","fenhu:geotiff_coverage6","fenhu:geotiff_coverage7","fenhu:geotiff_coverage8","fenhu:geotiff_coverage9","fenhu:geotiff_coverage10","fenhu:geotiff_coverage11","fenhu:geotiff_coverage12","fenhu:geotiff_coverage13","fenhu:geotiff_coverage14","fenhu:geotiff_coverage15","fenhu:geotiff_coverage16","fenhu:geotiff_coverage17","fenhu:geotiff_coverage18","fenhu:geotiff_coverage19","fenhu:geotiff_coverage20","fenhu:geotiff_coverage21","fenhu:geotiff_coverage22","fenhu:geotiff_coverage23","fenhu:geotiff_coverage24"],
+              "50year":["fenhu:fenhu:geotiff_coverage0","fenhu:geotiff_coverage1","fenhu:geotiff_coverage2","fenhu:geotiff_coverage3","fenhu:geotiff_coverage4","fenhu:geotiff_coverage5","fenhu:geotiff_coverage6","fenhu:geotiff_coverage7","fenhu:geotiff_coverage8","fenhu:geotiff_coverage9","fenhu:geotiff_coverage10","fenhu:geotiff_coverage11","fenhu:geotiff_coverage12","fenhu:geotiff_coverage13","fenhu:geotiff_coverage14","fenhu:geotiff_coverage15","fenhu:geotiff_coverage16","fenhu:geotiff_coverage17","fenhu:geotiff_coverage18","fenhu:geotiff_coverage19","fenhu:geotiff_coverage20","fenhu:geotiff_coverage21","fenhu:geotiff_coverage22","fenhu:geotiff_coverage23","fenhu:geotiff_coverage24"]
+          },
+            wdlayers: {"5year":[],"10year":[],"20year":[],"30year":[],"50year":[]},
+            date: [
+              "MAY-01-2020  09:00:00",
+              "MAY-01-2020  09:05:00",
+              "MAY-01-2020  09:10:00",
+              "MAY-01-2020  09:15:00",
+              "MAY-01-2020  09:20:00",
+              "MAY-01-2020  09:25:00",
+              "MAY-01-2020  09:30:00",
+              "MAY-01-2020  09:35:00",
+              "MAY-01-2020  09:40:00",
+              "MAY-01-2020  09:45:00",
+              "MAY-01-2020  09:50:00",
+              "MAY-01-2020  09:55:00",
+              "MAY-01-2020  10:00:00",
+              "MAY-01-2020  10:05:00",
+              "MAY-01-2020  10:10:00",
+              "MAY-01-2020  10:15:00",
+              "MAY-01-2020  10:20:00",
+              "MAY-01-2020  10:25:00",
+              "MAY-01-2020  10:30:00",
+              "MAY-01-2020  10:35:00",
+              "MAY-01-2020  10:40:00",
+              "MAY-01-2020  10:45:00",
+              "MAY-01-2020  10:50:00",
+              "MAY-01-2020  10:55:00",
+              "MAY-01-2020  11:00:00",
+            ],
+            intevalAnima: null,
+            curDateIndex: 0,
+            curYear:'5year',
+          };
+        },
+        methods: {
+          handleSelect(key, keyPath) {
+            console.log(key, keyPath);
+          },
+          handleClick() {},
+          setView() {
+            this.viewer.camera.setView({
+              destination: Cesium.Cartesian3.fromDegrees(
+                120.84401,
+                31.03674,
+                15000.0
+              ), // 设置位置
+
+              orientation: {
+                heading: Cesium.Math.toRadians(20.0), // 方向
+                pitch: Cesium.Math.toRadians(-90.0), // 倾斜角度
+                roll: 0,
+              },
+            });
+          },
+          initSize() {
+            $("#leafletMap").css("min-width", "0");
+            $("#leafletMap").css("min-height", "0");
+            $("#cesiumContainer").css("height", window.innerHeight - 61 - 75);
+            $(".tool").css("height", window.innerHeight - 61 - 75);
+            
+          },
+          //加载第几年的第几幅图层
+          loadFenhuLayer(flag, year, reload) {
+              if(reload === 0){
+                this.curDateIndex = 0;
+                this.timeSlider = 0;
+                this.pauseAnimation();
+              }
+            this.year = year;
+            this.startBtn = false;
+            this.maxSlider = this.date.length;
+            this.marks = {
+                1:this.formatTooltip(1)
+            };
+            // let arrLayer = this.wdlayers[year];
+            //替换该显示图层透明度
+            // for (let i = 0; i < this.wdlayers[year].length; i++) {
+            //     this.wdlayers[year][i].alpha = 0;
+            // }
+            for(let [key, val] of Object.entries(this.wdlayers)){
+                for(let i=0;i<val.length;i++){
+                    val[i].alpha = 0;
+                }
+            }
+            this.wdlayers[year][flag].alpha = 1;
+          },
+          //时间线变动函数
+          sliderChange(val) {
+            this.loadFenhuLayer(val, this.year);
+            this.curDateIndex = val;
+          },
+          formatTooltip(val) {
+            if (this.date != undefined) {
+                // MAY-01-2020  08:10:00
+                // yyyy-MM-dd hh-mm-ss
+                var month = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December']
+                var dateDay = this.date[val-1].split(/ +/)[0]
+                var dateSec = this.date[val-1].split(/ +/)[1]
+                var nyr = dateDay.split('-')
+                var hms = dateSec.split(':')
+                var dateStr = nyr[2]+'-'+nyr[1]+'-'
+                for (let i = 0; i < month.length; i++) {
+                    if(month[i].toLowerCase().includes(nyr[0].toLowerCase())){
+                        dateStr += ('0'+(i+1)).slice(-2) +' '+hms.join('-')
+                    }                
+                }
+                return dateStr
+            }
+          },
+          startAnimation() {
+            this.startBtn = true;
+            this.pauseBtn = false;
+
+            this.intevalAnima = setInterval(() => {
+              if (this.curDateIndex == this.date.length) {
+                this.curDateIndex = 0;
+                this.timeSlider = 0;
+              }
+              this.curDateIndex++;
+              this.timeSlider++;
+              this.loadFenhuLayer(this.curDateIndex, this.year);
+            }, 1000);
+          },
+          pauseAnimation() {
+            //btn
+            // this.selectBtn = false
+            this.startBtn = false;
+            this.pauseBtn = true;
+
+            clearInterval(this.intevalAnima);
+          },
+          addLayer() {
+            for (let [key, val] of Object.entries(this.layers)) {
+                let arrLayer = [];
+                for(let i=0;i<val.length;i++){
+                    let layer = val[i];
+                    let _baselayer = new Cesium.WebMapServiceImageryProvider({
+                        url: "http://localhost:8080/geoserver/fenhu/wms",
+                        layers: layer,
+                        parameters: {
+                        service: "WMS",
+                        format: "image/png",
+                        transparent: true,
+                        },
+                    });
+                    let border = this.viewer.imageryLayers.addImageryProvider(
+                        _baselayer
+                    );
+                    border.alpha = 0;
+                    // border = 0;
+                    arrLayer.push(border);
+                }     
+                // break;
+                this.wdlayers[key] = arrLayer;
+            }
+            console.log(this.wdlayers);
+          },
+        },
+
+        mounted() {
+            Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiODcwODhiOC00Y2M3LTQ3ZGYtODUxZC1kOGYzNzcyOWJjZDYiLCJpZCI6NTc4NTAsImlhdCI6MTYyMjY0MzE1MX0.W4miH8AfW1lWpjc75C6NX8mGCk--tV50M-3pWOquha4"
+    
+            this.viewer = new Cesium.Viewer("cesiumContainer", {
+              geocoder: false, //是否显示地名查找控件
+              sceneModePicker: false, //是否显示投影方式控件
+              navigationHelpButton: false, //是否显示帮助信息控件
+              baseLayerPicker: false, //是否显示图层选择控件
+              homeButton: false, //是否显示Home按钮
+              fullscreenButton: false, //是否显示全屏按钮
+              timeline: false, //时间轴控件
+              animation: false, //动画控件
+            });
+            //去cesium logo水印 或 css
+            this.viewer.cesiumWidget.creditContainer.style.display = "none"; //去cesium logo水印
+            this.setView();
+            this.initSize();
+            this.addLayer();
+            window.onresize = () => {
+                $("#cesiumContainer").css("height", window.innerHeight - 61 - 75);
+            };
+        },
+      });
+    </script>
+  </body>
+</html>

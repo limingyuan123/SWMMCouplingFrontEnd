@@ -33,6 +33,7 @@ module.exports = {
         new webpack.DefinePlugin({
           CESIUM_BASE_URL: JSON.stringify('static')
         }),
+        //plugin 有拷贝，合并等工具  CleanWebpackPlugin清理插件 HtmlWebpackPlugin自动生成html文件插件 HotModuleReplacementPlugin热更新插件
         new CopyWebpackPlugin([{ from: path.join(cesiumSource, 'Workers'), to: 'static/Workers' }]),
         new CopyWebpackPlugin([{ from: path.join(cesiumSource, 'Assets'), to: 'static/Assets' }]),
         new CopyWebpackPlugin([{ from: path.join(cesiumSource, 'ThirdParty'), to: 'static/ThirdParty' }]),
@@ -54,13 +55,15 @@ module.exports = {
         unknownContextCritical: false,
         rules: [
           {
+            //loader
+            //正则匹配.js文件
             test: /\.js$/,
             enforce: 'pre',
             include: path.resolve(__dirname, 'node_modules/cesium/Source'),
             sideEffects: false,
             use: [
               {
-                loader: 'strip-pragma-loader',
+                loader: 'strip-pragma-loader',//配置 strip-pragma-loader生产环境loader  常见的还有'style-loader', 'css-loader', 'sass-loader'  "babel-loader"
                 options: {
                   pragmas: {
                     debug: false

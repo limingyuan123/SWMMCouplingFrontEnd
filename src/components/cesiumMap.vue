@@ -18,15 +18,15 @@
                     <h2 style="margin:5px;">十年一遇降水</h2>
                     <p>选择该降水数据，展示模拟结果</p>
                 </el-button>
-                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadFenhuLayer(0,20)">
+                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadFenhuLayer(0, '20year', 0)">
                     <h2 style="margin:5px;">二十年一遇降水</h2>
                     <p>选择该降水数据，展示模拟结果</p>
                 </el-button>
-                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadDispRes(thirtyNow)">
+                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadFenhuLayer(0, '30year', 0)">
                     <h2 style="margin:5px;">三十年一遇降水</h2>
                     <p>选择该降水数据，展示模拟结果</p>
                 </el-button>
-                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadDispRes(fiftyNow)">
+                <el-button class="file" style="background:#d4d7d8;margin:5px" @click="loadFenhuLayer(0, '50year', 0)">
                     <h2 style="margin:5px;">五十年一遇降水</h2>
                     <p>选择该降水数据，展示模拟结果</p>
                 </el-button>
@@ -113,9 +113,11 @@
 
 <script>
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { Viewer } from "cesium";
-import * as Cesium from "cesium/Source/Cesium.js";
+import { Viewer } from "cesium";//es6的模块加载
+import * as Cesium from "cesium/Source/Cesium.js";//加载整个模块放到Cesium字段中 es6
 import * as echarts from 'echarts'
+// import {loadFile} from '../assets/js/loadFile'
+import loadFile from '../assets/js/loadFile'
 // import disp5 from '../data/result_5.disp'
 // import Cesium from 'cesium/Source/Cesium.js'
 export default {
@@ -149,18 +151,18 @@ export default {
       marks: {},
       startBtn:true,
       pauseBtn:true,
-      layers:[
-      'fenhu:fenhu0000_ProjectRaster1','fenhu:fenhu0001_ProjectRaster21','fenhu:fenhu0002_ProjectRaster1','fenhu:fenhu0003_ProjectRaster21',
-      'fenhu:fenhu0004_ProjectRaster1','fenhu:fenhu0005_ProjectRaster1','fenhu:fenhu0006_ProjectRaster1','fenhu:fenhu0007_ProjectRaster1',
-      'fenhu:fenhu0008_ProjectRaster1','fenhu:fenhu0009_ProjectRaster1','fenhu:fenhu0010_ProjectRaster1','fenhu:fenhu0011_ProjectRaster11',
-      'fenhu:fenhu0012_ProjectRaster1','fenhu:fenhu0013_ProjectRaster1','fenhu:fenhu0014_ProjectRaster1','fenhu:fenhu0015_ProjectRaster1',
-      'fenhu:fenhu0016_ProjectRaster1','fenhu:fenhu0017_ProjectRaster1','fenhu:fenhu0018_ProjectRaster1','fenhu:fenhu0019_ProjectRaster1',
-      'fenhu:fenhu0020_ProjectRaster1','fenhu:fenhu0021_ProjectRaster1','fenhu:fenhu0022_ProjectRaster1','fenhu:fenhu0023_ProjectRaster1',
-      'fenhu:fenhu0024_ProjectRaster1',],
-      wdlayers:[],
+     layers: {
+              "5year": ["fenhu:fenhu-0000","fenhu:fenhu-0001","fenhu:fenhu-0002","fenhu:fenhu-0003","fenhu:fenhu-0004","fenhu:fenhu-0005","fenhu:fenhu-0006","fenhu:fenhu-0007","fenhu:fenhu-0008","fenhu:fenhu-0009","fenhu:fenhu-0010","fenhu:fenhu-0011","fenhu:fenhu-0012","fenhu:fenhu-0013","fenhu:fenhu-0014","fenhu:fenhu-0015","fenhu:fenhu-0016","fenhu:fenhu-0017","fenhu:fenhu-0018","fenhu:fenhu-0019","fenhu:fenhu-0020","fenhu:fenhu-0021","fenhu:fenhu-0022","fenhu:fenhu-0023","fenhu:fenhu-0024"],
+              "10year":["fenhu:fenhu-0000","fenhu:fenhu-0001","fenhu:fenhu-0002","fenhu:fenhu-0003","fenhu:fenhu-0004","fenhu:fenhu-0005","fenhu:fenhu-0006","fenhu:fenhu-0007","fenhu:fenhu-0008","fenhu:fenhu-0009","fenhu:fenhu-0010","fenhu:fenhu-0011","fenhu:fenhu-0012","fenhu:fenhu-0013","fenhu:fenhu-0014","fenhu:fenhu-0015","fenhu:fenhu-0016","fenhu:fenhu-0017","fenhu:fenhu-0018","fenhu:fenhu-0019","fenhu:fenhu-0020","fenhu:fenhu-0021","fenhu:fenhu-0022","fenhu:fenhu-0023","fenhu:fenhu-0024"],
+              "20year":["fenhu:fenhu-0000","fenhu:fenhu-0001","fenhu:fenhu-0002","fenhu:fenhu-0003","fenhu:fenhu-0004","fenhu:fenhu-0005","fenhu:fenhu-0006","fenhu:fenhu-0007","fenhu:fenhu-0008","fenhu:fenhu-0009","fenhu:fenhu-0010","fenhu:fenhu-0011","fenhu:fenhu-0012","fenhu:fenhu-0013","fenhu:fenhu-0014","fenhu:fenhu-0015","fenhu:fenhu-0016","fenhu:fenhu-0017","fenhu:fenhu-0018","fenhu:fenhu-0019","fenhu:fenhu-0020","fenhu:fenhu-0021","fenhu:fenhu-0022","fenhu:fenhu-0023","fenhu:fenhu-0024"],
+              "30year":["fenhu:fenhu-0000","fenhu:fenhu-0001","fenhu:fenhu-0002","fenhu:fenhu-0003","fenhu:fenhu-0004","fenhu:fenhu-0005","fenhu:fenhu-0006","fenhu:fenhu-0007","fenhu:fenhu-0008","fenhu:fenhu-0009","fenhu:fenhu-0010","fenhu:fenhu-0011","fenhu:fenhu-0012","fenhu:fenhu-0013","fenhu:fenhu-0014","fenhu:fenhu-0015","fenhu:fenhu-0016","fenhu:fenhu-0017","fenhu:fenhu-0018","fenhu:fenhu-0019","fenhu:fenhu-0020","fenhu:fenhu-0021","fenhu:fenhu-0022","fenhu:fenhu-0023","fenhu:fenhu-0024"],
+              "50year":["fenhu:fenhu-0000","fenhu:fenhu-0001","fenhu:fenhu-0002","fenhu:fenhu-0003","fenhu:fenhu-0004","fenhu:fenhu-0005","fenhu:fenhu-0006","fenhu:fenhu-0007","fenhu:fenhu-0008","fenhu:fenhu-0009","fenhu:fenhu-0010","fenhu:fenhu-0011","fenhu:fenhu-0012","fenhu:fenhu-0013","fenhu:fenhu-0014","fenhu:fenhu-0015","fenhu:fenhu-0016","fenhu:fenhu-0017","fenhu:fenhu-0018","fenhu:fenhu-0019","fenhu:fenhu-0020","fenhu:fenhu-0021","fenhu:fenhu-0022","fenhu:fenhu-0023","fenhu:fenhu-0024"]
+          },
+      wdlayers: {"5year":[],"10year":[],"20year":[],"30year":[],"50year":[]},
       date: ["MAY-01-2020  09:00:00", "MAY-01-2020  09:05:00", "MAY-01-2020  09:10:00", "MAY-01-2020  09:15:00", "MAY-01-2020  09:20:00", "MAY-01-2020  09:25:00", "MAY-01-2020  09:30:00", "MAY-01-2020  09:35:00", "MAY-01-2020  09:40:00", "MAY-01-2020  09:45:00", "MAY-01-2020  09:50:00", "MAY-01-2020  09:55:00", "MAY-01-2020  10:00:00", "MAY-01-2020  10:05:00", "MAY-01-2020  10:10:00", "MAY-01-2020  10:15:00", "MAY-01-2020  10:20:00", "MAY-01-2020  10:25:00", "MAY-01-2020  10:30:00", "MAY-01-2020  10:35:00", "MAY-01-2020  10:40:00", "MAY-01-2020  10:45:00", "MAY-01-2020  10:50:00", "MAY-01-2020  10:55:00", "MAY-01-2020  11:00:00"],
       intevalAnima:null,
-      curDateIndex:0,
+      curDateIndex: 0,
+      curYear:'5year',
     }
   },
   methods: {
@@ -229,7 +231,7 @@ export default {
     },
     //将展示的geojson加载入cesium
     addGeoJson(json){
-        this.geojsonLayer = Cesium.GeoJsonDataSource.load(json, {
+      this.geojsonLayer = Cesium.GeoJsonDataSource.load(json, {
         stroke: Cesium.Color.BLUE,
         fill: Cesium.Color.BLUE.withAlpha(0.3), //注意：颜色必须大写，即不能为blue
         strokeWidth: 5
@@ -243,6 +245,12 @@ export default {
         for (let i = 0; i < entities.length; i++) {
           let entity = entities[i];
           //设置entity的billboard属性
+          let color = {
+            alpha: 1,
+            blue: 40,
+            green: 121,
+            red: 255
+          };
           let obj = {
             image: '/img/cesiumIcon/node.png',
             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
@@ -250,8 +258,10 @@ export default {
             scale: 1,
             width: 10,
             height: 10, 
-            color: Cesium.Color.GREEN,
+            // color: Cesium.Color.BLUE,
+            color: color,//40, 121, 255
           }
+          console.log(obj.color);
           entity.billboard = obj;
         }
         const handler = new Cesium.ScreenSpaceEventHandler(this.viewer.scene.canvas);
@@ -378,59 +388,68 @@ export default {
         })
     },
     //加载第几幅图层
-    loadFenhuLayer(flag){
+    //加载第几年的第几幅图层
+    loadFenhuLayer(flag, year, reload) {
+        if(reload === 0){
+          this.curDateIndex = 0;
+          this.timeSlider = 0;
+          this.pauseAnimation();
+        }
+      this.year = year;
       this.startBtn = false;
       this.maxSlider = this.date.length;
-      this.marks={
-        1:this.date[0]
-      }
+      this.marks = {
+          1:this.formatTooltip(1)
+      };
+      // let arrLayer = this.wdlayers[year];
       //替换该显示图层透明度
-      for(let i=0;i<this.wdlayers.length;i++){
-        this.wdlayers[i].alpha = 0;
-      }
-      this.wdlayers[flag].alpha = 1;
-      // if(this.wdlayers.length !== 0){
-      //   this.viewer.imageryLayers.remove(this.wdlayers[0]);
+      // for (let i = 0; i < this.wdlayers[year].length; i++) {
+      //     this.wdlayers[year][i].alpha = 0;
       // }
-      // this.wdlayers = [];
-      // let layer = this.layers[flag];
-      // let _baselayer = new Cesium.WebMapServiceImageryProvider({
-      //   url: 'http://localhost:8080/geoserver/fenhu/wms',
-      //   layers: layer,
-      //   parameters: {
-      //     service: 'WMS',
-      //     format: 'image/png',
-      //     transparent: true,
-      //   }
-      // }); 
-      // let border = this.viewer.imageryLayers.addImageryProvider(_baselayer);
-      // // border.alpha = 0.5;
-      // this.wdlayers.push(border);
-      // this.viewer.flyTo(this.viewer.imageryLayers);
+      for(let [key, val] of Object.entries(this.wdlayers)){
+          for(let i=0;i<val.length;i++){
+              val[i].alpha = 0;
+          }
+      }
+      this.wdlayers[year][flag].alpha = 1;
     },
     //时间线变动函数
-    sliderChange(val){
-      this.loadFenhuLayer(val);
+    sliderChange(val) {
+      this.loadFenhuLayer(val, this.year);
       this.curDateIndex = val;
     },
-    formatTooltip(val){
+    formatTooltip(val) {
       if (this.date != undefined) {
-        return this.date[val-1]
+          // MAY-01-2020  08:10:00
+          // yyyy-MM-dd hh-mm-ss
+          var month = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December']
+          var dateDay = this.date[val-1].split(/ +/)[0]
+          var dateSec = this.date[val-1].split(/ +/)[1]
+          var nyr = dateDay.split('-')
+          var hms = dateSec.split(':')
+          var dateStr = nyr[2]+'-'+nyr[1]+'-'
+          for (let i = 0; i < month.length; i++) {
+              if(month[i].toLowerCase().includes(nyr[0].toLowerCase())){
+                  dateStr += ('0'+(i+1)).slice(-2) +' '+hms.join('-')
+              }                
+          }
+          return dateStr
       }
     },
-    startAnimation(){
-      this.startBtn = true
-      this.pauseBtn = false
+    startAnimation() {
+      this.startBtn = true;
+      this.pauseBtn = false;
 
-      this.intevalAnima = setInterval(()=>{
+      this.intevalAnima = setInterval(() => {
         if (this.curDateIndex == this.date.length) {
-          this.curDateIndex = 0
-          this.timeSlider = 0
+          this.curDateIndex = 0;
+          this.timeSlider = 0;
         }
-        this.curDateIndex++
-        this.timeSlider++
-        this.loadFenhuLayer(this.curDateIndex);
-      },1000)
+        this.curDateIndex++;
+        this.timeSlider++;
+        this.loadFenhuLayer(this.curDateIndex, this.year);
+      }, 1000);
     },
     pauseAnimation(){
       //btn
@@ -440,23 +459,32 @@ export default {
 
       clearInterval(this.intevalAnima)
     },
-    addLayer(){
-      for(let i=0;i<this.layers.length;i++){
-        let layer = this.layers[i];
-        let _baselayer = new Cesium.WebMapServiceImageryProvider({
-          url: 'http://localhost:8080/geoserver/fenhu/wms',
-          layers: layer,
-          parameters: {
-            service: 'WMS',
-            format: 'image/png',
-            transparent: true,
-          }
-        }); 
-        let border = this.viewer.imageryLayers.addImageryProvider(_baselayer);
-        border.alpha = 0;
-        this.wdlayers.push(border);
+    addLayer() {
+      for (let [key, val] of Object.entries(this.layers)) {
+          let arrLayer = [];
+          for(let i=0;i<val.length;i++){
+              let layer = val[i];
+              let _baselayer = new Cesium.WebMapServiceImageryProvider({
+                  url: "http://localhost:8080/geoserver/fenhu/wms",
+                  layers: layer,
+                  parameters: {
+                  service: "WMS",
+                  format: "image/png",
+                  transparent: true,
+                  },
+              });
+              let border = this.viewer.imageryLayers.addImageryProvider(
+                  _baselayer
+              );
+              border.alpha = 0;
+              // border = 0;
+              arrLayer.push(border);
+          }     
+          // break;
+          this.wdlayers[key] = arrLayer;
       }
-    }    
+      console.log(this.wdlayers);
+    },   
   },
   mounted() {
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiODcwODhiOC00Y2M3LTQ3ZGYtODUxZC1kOGYzNzcyOWJjZDYiLCJpZCI6NTc4NTAsImlhdCI6MTYyMjY0MzE1MX0.W4miH8AfW1lWpjc75C6NX8mGCk--tV50M-3pWOquha4"
@@ -476,7 +504,7 @@ export default {
     // this.loadFenhuLayer(0);
     //将所有layer都获取到，并置透明度为0
     this.addLayer();
-
+    console.log(loadFile);
   },
 };
 </script>

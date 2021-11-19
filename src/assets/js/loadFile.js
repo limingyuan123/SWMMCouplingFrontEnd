@@ -7,4 +7,7 @@ const loadFile = function(path){
     xhr.send(null);
     return xhr.status === okStatus ? xhr.responseText : null;
 }
+
+//es6 模块抛出
+// export {loadFile};
 export default loadFile;
